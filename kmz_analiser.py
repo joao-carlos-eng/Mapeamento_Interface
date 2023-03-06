@@ -49,36 +49,42 @@ class Application:
         tree = ET.parse(self.tmp_folder[0])
         root = tree.getroot()
         placemarks = root.findall(
-            ".//{http://www.opengis.net/kml/2.2}Placemark[{http://www.opengis.net/kml/2.2}Point]/{"
-            "http://www.opengis.net/kml/2.2}ExtendedData")
+            ".//{http://www.opengis.net/kml/2.2}Placemark[{http://www.opengis.net/kml/2.2}Point]")
+
         for placemark in placemarks:
             self.placemarks.append(placemark)
 
-        self.current_placemark = 0
+            self.show_placemark()
 
-        self.show_placemark()
+        print(self.current_placemark)
 
     def show_placemark(self):
-        # Cria uma janela interativa que exibe as informações dos placemarks encontrados.
         if self.current_placemark < len(self.placemarks):
             placemark = self.placemarks[self.current_placemark]
-            # Adicione um código para mostrar as informações do placemark.
+            name = placemark.find(".//{http://www.opengis.net/kml/2.2}name").text
+            coordinates = placemark.find(".//{http://www.opengis.net/kml/2.2}coordinates").text
+            description = placemark.find(".//{http://www.opengis.net/kml/2.2}description").text if placemark.find(
+                ".//{http://www.opengis.net/kml/2.2}description") is not None else ''
+            print(name, coordinates, description)
+
             placemark_atributos = {}
-            for data in placemark.findall(r".//{http://www.opengis.net/kml/2.2}Data"):
+            for data in placemark.findall(".//{http://www.opengis.net/kml/2.2}ExtendedData/{"
+                                          "http://www.opengis.net/kml/2.2}Data"):
                 name = data.attrib['name']
                 try:
-                    value = data.find(r"{http://www.opengis.net/kml/2.2}value").text
+                    value = data.find("{http://www.opengis.net/kml/2.2}value").text
                 except AttributeError:
                     continue
                 placemark_atributos[name] = value
-                print(placemark_atributos)
+
             if placemark_atributos.get('pictures') is not None:
                 picture = placemark_atributos.get('pictures')
                 picture_path = os.path.join(self.tmp_folder[1], picture)
                 print(self.current_placemark, picture_path)
-        else:
-            ...
-            # Adicione um código para mostrar uma mensagem de que todos os placemarks foram analisados.
+
+            print(placemark_atributos)
+
+        self.current_placemark += 1
 
     def move_placemark(self, category):
         # Adicione um código para mover o placemark para a pasta aprovados ou reprovados, dependendo da categoria.
@@ -104,4 +110,3 @@ class Application:
 app = Application()
 app.select_file()
 app.load_placemarks()
-
