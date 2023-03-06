@@ -3,7 +3,7 @@ import shutil
 import tempfile
 import zipfile
 from tkinter import filedialog
-from xml.etree import ElementTree as ET
+from xml.etree import ElementTree as Et
 
 
 def extract_kml(kmz_path):
@@ -46,7 +46,7 @@ class Application:
 
     def load_placemarks(self):
         # Analisa o arquivo KML usando a biblioteca Etree e encontra todos os placemarks pontos com extensões de dados.
-        tree = ET.parse(self.tmp_folder[0])
+        tree = Et.parse(self.tmp_folder[0])
         root = tree.getroot()
         placemarks = root.findall(
             ".//{http://www.opengis.net/kml/2.2}Placemark[{http://www.opengis.net/kml/2.2}Point]")
@@ -61,13 +61,16 @@ class Application:
     def show_placemark(self):
         if self.current_placemark < len(self.placemarks):
             placemark = self.placemarks[self.current_placemark]
+            placemark_atributos = {}
+
             name = placemark.find(".//{http://www.opengis.net/kml/2.2}name").text
             coordinates = placemark.find(".//{http://www.opengis.net/kml/2.2}coordinates").text
             description = placemark.find(".//{http://www.opengis.net/kml/2.2}description").text if placemark.find(
                 ".//{http://www.opengis.net/kml/2.2}description") is not None else ''
-            print(name, coordinates, description)
+            placemark_atributos['name'] = name
+            placemark_atributos['coordinates'] = coordinates
+            placemark_atributos['description'] = description
 
-            placemark_atributos = {}
             for data in placemark.findall(".//{http://www.opengis.net/kml/2.2}ExtendedData/{"
                                           "http://www.opengis.net/kml/2.2}Data"):
                 name = data.attrib['name']
@@ -94,19 +97,10 @@ class Application:
             os.makedirs(category_folder)
         move_folder = os.path.join(category_folder, placemark.get('id') + ".kml")
         with open(move_folder, 'wb') as f:
-            f.write(ET.tostring(placemark))
-
-    def next_placemark(self):
-        if self.current_placemark < len(self.placemarks) - 1:
-            self.current_placemark += 1
-            self.show_placemark()
-
-    def previous_placemark(self):
-        if self.current_placemark > 0:
-            self.current_placemark -= 1
-            self.show_placemark()
+            f.write(Et.tostring(placemark))
 
 
-app = Application()
-app.select_file()
-app.load_placemarks()
+if __name__ == '__main__':
+    app = Application()
+    app.select_file()
+    app.load_placemarks()

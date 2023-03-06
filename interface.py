@@ -4,6 +4,7 @@ import sys
 from design import Ui_MainWindow
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PyQt5.QtGui import QPixmap
+import kmz_analiser
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -17,6 +18,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.label_14.setPixmap(QPixmap(self.imagem))
             self.label_14.setScaledContents(True)
             self.label_14.adjustSize()
+
+    def next_placemark(self):
+        if self.current_placemark < len(self.placemarks) - 1:
+            self.current_placemark += 1
+            self.show_placemark()
+
+    def previous_placemark(self):
+        if self.current_placemark > 0:
+            self.current_placemark -= 1
+            self.show_placemark()
 
 
 if __name__ == '__main__':
