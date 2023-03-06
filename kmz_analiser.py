@@ -51,10 +51,9 @@ class Application:
         placemarks = root.findall(
             ".//{http://www.opengis.net/kml/2.2}Placemark[{http://www.opengis.net/kml/2.2}Point]")
 
+        print(type(placemarks))
         for placemark in placemarks:
             self.placemarks.append(placemark)
-
-            self.show_placemark()
 
         print(self.current_placemark)
 
@@ -83,9 +82,7 @@ class Application:
             if placemark_atributos.get('pictures') is not None:
                 picture = placemark_atributos.get('pictures')
                 picture_path = os.path.join(self.tmp_folder[1], picture)
-                print(self.current_placemark, picture_path)
-
-            print(placemark_atributos)
+                placemark_atributos['picture_path'] = picture_path
 
         self.current_placemark += 1
 
