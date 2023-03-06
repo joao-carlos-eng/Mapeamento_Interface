@@ -6,11 +6,14 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
 from PyQt5.QtGui import QPixmap
 import kmz_analiser
 
+analizer = kmz_analiser.Application()
+
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, kmz=analizer):
         super().__init__()
         self.setupUi(self)
+        self.kmz = kmz
 
     def abrir_imagem(self):
         self.imagem = QFileDialog.getOpenFileName(self, 'Abrir Imagem', filter='Imagens (*.png *.jpg *.bmp)')[0]
