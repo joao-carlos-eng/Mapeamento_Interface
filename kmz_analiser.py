@@ -6,7 +6,8 @@ from tkinter import filedialog
 from xml.etree import ElementTree as Et
 
 
-def extract_kml(kmz_path):
+# Função para extrair o arquivo.kml e a pasta "files" do KMZ
+def extract_kmz(kmz_path):
     # Cria uma pasta temporária
     temp_dir = tempfile.mkdtemp()
 
@@ -18,14 +19,14 @@ def extract_kml(kmz_path):
     files_dir = os.path.join(temp_dir, 'files')
     os.mkdir(files_dir)
 
-    # Extrai todos os arquivos.jpg da pasta "files" no KMZ para a pasta "files" na pasta temporária
+    # Extrai todos os arquivos.jpg da pasta "files" ou "images" no KMZ para a pasta "files" na pasta temporária
     with zipfile.ZipFile(kmz_path, 'r') as zip_ref:
         for zip_info in zip_ref.infolist():
-            if zip_info.filename.startswith('files/') and zip_info.filename.endswith('.jpg'):
+            if (zip_info.filename.startswith('files/') or zip_info.filename.startswith('images/')) and zip_info.filename.endswith('.jpg'):
                 filename = os.path.basename(zip_info.filename)
                 target_path = os.path.join(files_dir, filename)
                 with zip_ref.open(zip_info) as source, open(target_path, 'wb') as target:
-                    shutil.copyfileobj(source, target)
+                    shutil.copyfileobj(source, target, 1024 * 8)
 
     # Retorna o caminho para o arquivo.kml e a pasta "files"
     return os.path.join(temp_dir, 'doc.kml'), files_dir
@@ -42,7 +43,7 @@ class Application:
     def select_file(self):
         self.filename = filedialog.askopenfilename(initialdir=os.getcwd(), title="Selecione um arquivo KMZ",
                                                    filetypes=[("KMZ files", "*.kmz")])
-        self.tmp_folder = extract_kml(self.filename)
+        self.tmp_folder = extract_kmz(self.filename)
 
     def load_placemarks(self):
         # Analisa o arquivo KML usando a biblioteca Etree e encontra todos os placemarks pontos com extensões de dados.
@@ -51,11 +52,8 @@ class Application:
         placemarks = root.findall(
             ".//{http://www.opengis.net/kml/2.2}Placemark[{http://www.opengis.net/kml/2.2}Point]")
 
-        print(type(placemarks))
         for placemark in placemarks:
             self.placemarks.append(placemark)
-
-        print(self.current_placemark)
 
     def show_placemark(self):
         if self.current_placemark < len(self.placemarks):
@@ -84,7 +82,8 @@ class Application:
                 picture_path = os.path.join(self.tmp_folder[1], picture)
                 placemark_atributos['picture_path'] = picture_path
 
-        self.current_placemark += 1
+            print(placemark_atributos)
+            return placemark_atributos
 
     def move_placemark(self, category):
         # Adicione um código para mover o placemark para a pasta aprovados ou reprovados, dependendo da categoria.
@@ -101,3 +100,5 @@ if __name__ == '__main__':
     app = Application()
     app.select_file()
     app.load_placemarks()
+    placemark = app.show_placemark()
+    print(placemark)
