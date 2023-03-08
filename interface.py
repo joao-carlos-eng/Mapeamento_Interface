@@ -10,7 +10,7 @@ analizer = kmz_analiser.Application()
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self, parent=None, kmz=analizer):
+    def __init__(self, kmz=analizer):
         super().__init__()
         self.setupUi(self)
         self.kmz = kmz
@@ -35,10 +35,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def exibir_dados(self):
         place = self.kmz.show_placemark()
+
         if place.get('picture_path') is not None:
-            self.image_area.setPixmap(QPixmap(place['picture_path'].strip()))
-            self.image_area.setScaledContents(True)
-            self.image_area.adjustSize()
+            # Verifica se picture_path é uma lista
+            if isinstance(place['picture_path'], list):
+                for path in place['picture_path']:
+                    pixmap = QPixmap(path.strip())
+                    self.image_area.setPixmap(pixmap)
+            else:
+                pixmap = QPixmap(place['picture_path'].strip())
+                self.image_area.setPixmap(pixmap)
+
         if place.get('name') is not None:
             self.lineEdit_name.setText(place['name'])
         if place.get('coordinates') is not None:
