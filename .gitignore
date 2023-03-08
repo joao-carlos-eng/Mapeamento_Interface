@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 /tmp/
 .idea/dbnavigator.xml
+arquivo.kmz
+.idea/Mapeamento_Interface.iml

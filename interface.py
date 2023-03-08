@@ -1,8 +1,8 @@
 # pyuic5 design.ui -o design.py
-
+import os.path
 import sys
 from design import Ui_MainWindow
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QGridLayout
 from PyQt5.QtGui import QPixmap
 import kmz_analiser
 
@@ -16,16 +16,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.kmz = kmz
 
         self.carregarArquivo.clicked.connect(self.select_file)
+        self.next.clicked.connect(self.next_placemark)
+        self.previous.clicked.connect(self.previous_placemark)
+
+        self.image_area = QLabel(self)
 
     def next_placemark(self):
-        if self.current_placemark < len(self.placemarks) - 1:
-            self.current_placemark += 1
-            self.show_placemark()
+        if self.kmz.current_placemark < len(self.kmz.placemarks) - 1:
+            self.kmz.current_placemark += 1
+            self.exibir_dados()
 
     def previous_placemark(self):
-        if self.current_placemark > 0:
-            self.current_placemark -= 1
-            self.show_placemark()
+        if self.kmz.current_placemark > 0:
+            self.kmz.current_placemark -= 1
+            self.exibir_dados()
 
     def select_file(self):
         self.kmz.select_file()
@@ -34,17 +38,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.exibir_dados()
 
     def exibir_dados(self):
+        self.image_area.clear()
         place = self.kmz.show_placemark()
 
         if place.get('picture_path') is not None:
-            # Verifica se picture_path é uma lista
-            if isinstance(place['picture_path'], list):
-                for path in place['picture_path']:
-                    pixmap = QPixmap(path.strip())
-                    self.image_area.setPixmap(pixmap)
-            else:
-                pixmap = QPixmap(place['picture_path'].strip())
-                self.image_area.setPixmap(pixmap)
+            self.exibir_imagem(place['picture_path'])
+        else:
+            self.exibir_imagem([])
 
         if place.get('name') is not None:
             self.lineEdit_name.setText(place['name'])
@@ -65,12 +65,38 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if place.get('5.comercio') is not None:
             self.line_comercio.setText(place['5.comercio'])
         if place.get('6.predio') is not None:
-            self.line_industria.setText(place['6.predio'])
+            self.line_predio.setText(place['6.predio'])
         if place.get('7.equipamento') is not None:
             self.line_equipamento.setText(place['7.equipamento'])
+        if place.get('8.codigo') is not None:
             self.line_codigo.setText(place['8.codigo'])
+        else:
+            self.line_codigo.setText('Não informado')
         if place.get('9.ocupante') is not None:
             self.line_ocupante.setText(place['9.ocupante'])
+
+    def exibir_imagem(self, list_of_images):
+        layout = QGridLayout()
+
+        pixmaps = []
+        for path in list_of_images:
+            if os.path.exists(path.strip()):
+                pixmap = QPixmap(path.strip())
+                pixmaps.append(pixmap)
+            else:
+                print(f"Imagem não encontrada: {path}")
+
+        row_count = 2
+        col_count = (len(pixmaps) + 1) // 2
+        layout.addWidget(self.image_area, 0, 0, row_count, col_count)
+        for i, pixmap in enumerate(pixmaps):
+            image_label = QLabel(self)
+            image_label.setPixmap(pixmap)
+            row = i // col_count
+            col = i % col_count
+            layout.addWidget(image_label, row + 1, col)
+
+        self.scrollArea.setLayout(layout)
 
 
 if __name__ == '__main__':

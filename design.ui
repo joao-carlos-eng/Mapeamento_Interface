@@ -15,106 +15,32 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="8" column="5">
-     <widget class="QPushButton" name="carregarArquivo">
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_3">
       <property name="text">
-       <string>Carregar</string>
+       <string>2.esforco</string>
       </property>
      </widget>
     </item>
-    <item row="8" column="1">
-     <widget class="QLabel" name="label_15">
+    <item row="8" column="6">
+     <widget class="QPushButton" name="previous">
       <property name="text">
-       <string>Coordenadas</string>
+       <string>Anterior</string>
       </property>
      </widget>
     </item>
-    <item row="6" column="3">
-     <widget class="QLineEdit" name="line_ocupante"/>
+    <item row="4" column="1">
+     <widget class="QLineEdit" name="line_esforco"/>
     </item>
-    <item row="7" column="6">
-     <widget class="QPushButton" name="refazer">
+    <item row="8" column="7">
+     <widget class="QPushButton" name="next">
       <property name="text">
-       <string>Refazer</string>
+       <string>Proximo</string>
       </property>
      </widget>
     </item>
-    <item row="7" column="5">
-     <widget class="QPushButton" name="aprovar">
-      <property name="text">
-       <string>Aprovar</string>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="7">
-     <widget class="QPushButton" name="reprovar">
-      <property name="text">
-       <string>Reprovar</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="4">
-     <widget class="QLabel" name="label_13">
-      <property name="text">
-       <string>descrição</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0" colspan="4">
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>ExtendedData</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0" colspan="8">
-     <widget class="QScrollArea" name="scrollArea">
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>709</width>
-         <height>579</height>
-        </rect>
-       </property>
-       <widget class="QLabel" name="image_area">
-        <property name="geometry">
-         <rect>
-          <x>6</x>
-          <y>2</y>
-          <width>701</width>
-          <height>571</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Sem imagens</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </widget>
-     </widget>
-    </item>
-    <item row="2" column="3">
-     <widget class="QLineEdit" name="line_comercio"/>
-    </item>
-    <item row="2" column="2">
-     <widget class="QLabel" name="label_7">
-      <property name="text">
-       <string>5.comercio</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="5" rowspan="5" colspan="3">
-     <widget class="QTextEdit" name="description"/>
+    <item row="8" column="2" colspan="2">
+     <widget class="QLineEdit" name="lineEdit_coordinates"/>
     </item>
     <item row="5" column="2">
      <widget class="QLabel" name="label_10">
@@ -130,14 +56,15 @@
       </property>
      </widget>
     </item>
-    <item row="5" column="3">
-     <widget class="QLineEdit" name="line_codigo"/>
+    <item row="2" column="5" rowspan="5" colspan="3">
+     <widget class="QTextEdit" name="description"/>
     </item>
-    <item row="5" column="1">
-     <widget class="QLineEdit" name="line_rede"/>
-    </item>
-    <item row="6" column="1">
-     <widget class="QLineEdit" name="line_casa"/>
+    <item row="2" column="2">
+     <widget class="QLabel" name="label_7">
+      <property name="text">
+       <string>5.comercio</string>
+      </property>
+     </widget>
     </item>
     <item row="6" column="2">
      <widget class="QLabel" name="label_11">
@@ -146,6 +73,12 @@
       </property>
      </widget>
     </item>
+    <item row="5" column="1">
+     <widget class="QLineEdit" name="line_rede"/>
+    </item>
+    <item row="6" column="1">
+     <widget class="QLineEdit" name="line_casa"/>
+    </item>
     <item row="6" column="0">
      <widget class="QLabel" name="label_6">
       <property name="text">
@@ -153,12 +86,8 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>0.tipo</string>
-      </property>
-     </widget>
+    <item row="5" column="3">
+     <widget class="QLineEdit" name="line_codigo"/>
     </item>
     <item row="3" column="3">
      <widget class="QLineEdit" name="line_predio"/>
@@ -170,11 +99,18 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="5" colspan="3">
-     <widget class="QLineEdit" name="lineEdit_name"/>
-    </item>
     <item row="2" column="1">
      <widget class="QLineEdit" name="line_tipo"/>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>0.tipo</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="5" colspan="3">
+     <widget class="QLineEdit" name="lineEdit_name"/>
     </item>
     <item row="3" column="0">
      <widget class="QLabel" name="label_2">
@@ -203,32 +139,80 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="label_3">
+    <item row="6" column="3">
+     <widget class="QLineEdit" name="line_ocupante"/>
+    </item>
+    <item row="8" column="1">
+     <widget class="QLabel" name="label_15">
       <property name="text">
-       <string>2.esforco</string>
+       <string>Coordenadas</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="1">
-     <widget class="QLineEdit" name="line_esforco"/>
-    </item>
-    <item row="8" column="6">
-     <widget class="QPushButton" name="previus">
+    <item row="8" column="5">
+     <widget class="QPushButton" name="carregarArquivo">
       <property name="text">
-       <string>Anterior</string>
+       <string>Carregar</string>
       </property>
      </widget>
     </item>
-    <item row="8" column="7">
-     <widget class="QPushButton" name="next">
+    <item row="4" column="4">
+     <widget class="QLabel" name="label_13">
       <property name="text">
-       <string>Proximo</string>
+       <string>descrição</string>
       </property>
      </widget>
     </item>
-    <item row="8" column="2" colspan="2">
-     <widget class="QLineEdit" name="lineEdit_coordinates"/>
+    <item row="7" column="7">
+     <widget class="QPushButton" name="reprovar">
+      <property name="text">
+       <string>Reprovar</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="4">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>ExtendedData</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="6">
+     <widget class="QPushButton" name="refazer">
+      <property name="text">
+       <string>Refazer</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="5">
+     <widget class="QPushButton" name="aprovar">
+      <property name="text">
+       <string>Aprovar</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QLineEdit" name="line_comercio"/>
+    </item>
+    <item row="0" column="0" colspan="8">
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scroll_Area">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>709</width>
+         <height>579</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
     </item>
    </layout>
   </widget>
