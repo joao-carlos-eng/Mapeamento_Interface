@@ -1,35 +1,43 @@
 import os
-import shutil
+import re
 import tempfile
 import zipfile
 from tkinter import filedialog
 from xml.etree import ElementTree as Et
 
 
-# Função para extrair o arquivo.kml e a pasta "files" do KMZ
-def extract_kmz(kmz_path):
-    # Cria uma pasta temporária
-    temp_dir = tempfile.mkdtemp()
+def tratar_picture_path(picture_path, tmp_folder):
+    padrao = r'<img src="([^"]+)"\/>'
+    matches = re.findall(padrao, picture_path)
 
-    # Extrai o arquivo.kml do KMZ para a pasta temporária
+    lista_imagens = []
+    if len(matches) > 0:
+        for match in matches:
+            lista_imagens.append(os.path.join(tmp_folder, match))
+
+    print('Imagens encontradas: ', lista_imagens)
+    return lista_imagens
+
+
+def extract_files_from_kmz(kmz_path):
+    # extrai todos os arquivos do kmz para uma pasta temporária
+    tmp_folder = tempfile.mkdtemp()
     with zipfile.ZipFile(kmz_path, 'r') as zip_ref:
-        zip_ref.extract('doc.kml', temp_dir)
+        if 'doc.kml' in zip_ref.namelist():
+            zip_ref.extract('doc.kml', tmp_folder)
+        for file in zip_ref.namelist():
+            if file.endswith('.jpg') or file.endswith('.JPG'):
+                try:
+                    zip_ref.extract(file, tmp_folder)
+                except Exception as e:
+                    print('Imagem corrompida: ', file)
+                    pass
+                continue
 
-    # Cria uma pasta "files" na pasta temporária
-    files_dir = os.path.join(temp_dir, 'files')
-    os.mkdir(files_dir)
+    kml_path = os.path.join(tmp_folder, 'doc.kml')
 
-    # Extrai todos os arquivos.jpg da pasta "files" ou "images" no KMZ para a pasta "files" na pasta temporária
-    with zipfile.ZipFile(kmz_path, 'r') as zip_ref:
-        for zip_info in zip_ref.infolist():
-            if (zip_info.filename.startswith('files/') or zip_info.filename.startswith('images/')) and zip_info.filename.endswith('.jpg'):
-                filename = os.path.basename(zip_info.filename)
-                target_path = os.path.join(files_dir, filename)
-                with zip_ref.open(zip_info) as source, open(target_path, 'wb') as target:
-                    shutil.copyfileobj(source, target, 1024 * 8)
-
-    # Retorna o caminho para o arquivo.kml e a pasta "files"
-    return os.path.join(temp_dir, 'doc.kml'), files_dir
+    print('Arquivo KML extraído: ', kml_path)
+    return kml_path, tmp_folder
 
 
 class Application:
@@ -43,7 +51,7 @@ class Application:
     def select_file(self):
         self.filename = filedialog.askopenfilename(initialdir=os.getcwd(), title="Selecione um arquivo KMZ",
                                                    filetypes=[("KMZ files", "*.kmz")])
-        self.tmp_folder = extract_kmz(self.filename)
+        self.tmp_folder = extract_files_from_kmz(self.filename)
 
     def load_placemarks(self):
         # Analisa o arquivo KML usando a biblioteca Etree e encontra todos os placemarks pontos com extensões de dados.
@@ -79,7 +87,7 @@ class Application:
 
             if placemark_atributos.get('pictures') is not None:
                 picture = placemark_atributos.get('pictures')
-                picture_path = os.path.join(self.tmp_folder[1], picture)
+                picture_path = tratar_picture_path(picture, self.tmp_folder[1])
                 placemark_atributos['picture_path'] = picture_path
 
             print(placemark_atributos)
