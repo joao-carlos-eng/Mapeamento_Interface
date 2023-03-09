@@ -132,4 +132,4 @@ dmypy.json
 arquivo.kmz
 .idea/Mapeamento_Interface.iml
 
-.kmz
+*.kmz
