@@ -15,7 +15,6 @@ def tratar_picture_path(picture_path, tmp_folder):
         for match in matches:
             lista_imagens.append(os.path.join(tmp_folder, match))
 
-    print('Imagens encontradas: ', lista_imagens)
     return lista_imagens
 
 
@@ -36,7 +35,6 @@ def extract_files_from_kmz(kmz_path):
 
     kml_path = os.path.join(tmp_folder, 'doc.kml')
 
-    print('Arquivo KML extraído: ', kml_path)
     return kml_path, tmp_folder
 
 
