@@ -39,9 +39,6 @@
       </property>
      </widget>
     </item>
-    <item row="8" column="2" colspan="2">
-     <widget class="QLineEdit" name="lineEdit_coordinates"/>
-    </item>
     <item row="5" column="2">
      <widget class="QLabel" name="label_10">
       <property name="text">
@@ -142,13 +139,6 @@
     <item row="6" column="3">
      <widget class="QLineEdit" name="line_ocupante"/>
     </item>
-    <item row="8" column="1">
-     <widget class="QLabel" name="label_15">
-      <property name="text">
-       <string>Coordenadas</string>
-      </property>
-     </widget>
-    </item>
     <item row="8" column="5">
      <widget class="QPushButton" name="carregarArquivo">
       <property name="text">
@@ -212,6 +202,23 @@
         </rect>
        </property>
       </widget>
+     </widget>
+    </item>
+    <item row="8" column="0">
+     <widget class="QLabel" name="label_15">
+      <property name="text">
+       <string>Coordenadas</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="1">
+     <widget class="QLineEdit" name="lineEdit_coordinates"/>
+    </item>
+    <item row="8" column="3">
+     <widget class="QPushButton" name="salvar_arquivo">
+      <property name="text">
+       <string>Salvar</string>
+      </property>
      </widget>
     </item>
    </layout>

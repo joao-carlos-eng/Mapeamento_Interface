@@ -1,8 +1,9 @@
 # pyuic5 design.ui -o design.py
 import os.path
+import shutil
 import sys
 from design import Ui_MainWindow
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QGridLayout, QWidget, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QWidget, QHBoxLayout, QFileDialog
 from PyQt5.QtGui import QPixmap
 import kmz_analiser
 
@@ -18,10 +19,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.carregarArquivo.clicked.connect(self.select_file)
         self.next.clicked.connect(self.next_placemark)
         self.previous.clicked.connect(self.previous_placemark)
+        self.aprovar.clicked.connect(self.aprovar_place)
+        self.refazer.clicked.connect(self.refazer_place)
+        self.reprovar.clicked.connect(self.reprovar_place)
+        self.salvar_arquivo.clicked.connect(self.salvar_alteracoes)
 
         self.image_widgets = []  # lista de widgets de imagem
         self.image_area = QWidget(self.scroll_Area)  # widget que contém as imagens
         self.image_layout = QHBoxLayout(self.image_area)  # layout para as imagens
+
+        self.aprovados = []
+        self.reprovados = []
+        self.a_refazer = []
 
     def next_placemark(self):
         if self.kmz.current_placemark < len(self.kmz.placemarks) - 1:
@@ -38,6 +47,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.kmz.load_placemarks()
 
         self.exibir_dados()
+
+    def aprovar_place(self):
+        self.aprovados.append(self.kmz.placemarks[self.kmz.current_placemark])
+        self.next_placemark()
+
+    def refazer_place(self):
+        self.a_refazer.append(self.kmz.placemarks[self.kmz.current_placemark])
+        self.next_placemark()
+
+    def reprovar_place(self):
+        self.reprovados.append(self.kmz.placemarks[self.kmz.current_placemark])
+        self.next_placemark()
 
     def exibir_dados(self):
         place = self.kmz.show_placemark()
@@ -120,6 +141,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Define o layout do widget de scroll como sendo o layout que contém as imagens
         self.scroll_Area.setLayout(self.image_layout)
+
+    def salvar_alteracoes(self):
+        path_to_save = QFileDialog.getExistingDirectory(self, 'Selecione o diretório para salvar os arquivos')
+
+        result = self.kmz.save_to_kmz()
+
+        if len(self.aprovados) > 0:
+            for place in self.aprovados:
+                self.kmz.tmp_folder[0][0][1].append(place)
+        if len(self.reprovados) > 0:
+            for place in self.reprovados:
+                self.kmz.tmp_folder[0][0][2].append(place)
+        if len(self.a_refazer) > 0:
+            for place in self.a_refazer:
+                self.kmz.tmp_folder[0][0][3].append(place)
+
+        # Salva o kmz com as alterações com o mesmo nome do arquivo original no diretorio selecionado
+        shutil.copyfile(result, os.path.join(path_to_save, os.path.basename(result)))
+
+        self.aprovados = []
+        self.reprovados = []
+        self.a_refazer = []
+        self.kmz.current_placemark = 0
 
 
 if __name__ == '__main__':

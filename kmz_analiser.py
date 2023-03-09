@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 import tempfile
 import zipfile
 from tkinter import filedialog
@@ -44,7 +45,7 @@ class Application:
         self.placemarks = []
         self.current_placemark = 0
         self.filename = ''
-        self.tmp_folder = ''
+        self.tmp_folder = []
 
     def select_file(self):
         self.filename = filedialog.askopenfilename(initialdir=os.getcwd(), title="Selecione um arquivo KMZ",
@@ -100,6 +101,35 @@ class Application:
         move_folder = os.path.join(category_folder, placemark.get('id') + ".kml")
         with open(move_folder, 'wb') as f:
             f.write(Et.tostring(placemark))
+
+    def save_to_kmz(self):
+        if not self.filename:
+            # se o arquivo não tiver sido carregado ainda, não há nada para salvar
+            return
+
+        # Cria uma pasta no arquivo kml para os arquivos aprovados e reprovados e refaz o arquivo kml
+        doc = Et.parse(self.tmp_folder[0])
+        root = doc.getroot()
+        root[0].append(Et.Element('Folder'))
+        root[0][1].set('id', 'Aprovados')
+        root[0].append(Et.Element('Folder'))
+        root[0][2].set('id', 'Reprovados')
+        root[0].append(Et.Element('Folder'))
+        root[0][3].set('id', 'A refazer')
+        doc.write(self.tmp_folder[0])
+
+        # Cria um arquivo KMZ com o mesmo nome do arquivo original, mas com a extensão.kmz
+        kmz_path = self.filename.replace('.kmz', '_new.kmz')
+        with zipfile.ZipFile(kmz_path, 'w') as zip_ref:
+            # Adiciona o arquivo KML modificado ao arquivo KMZ
+            zip_ref.write(self.tmp_folder[0], 'doc.kml')
+
+            # Adiciona todas as imagens ao arquivo KMZ
+            for file in os.listdir(self.tmp_folder[1]):
+                if file.endswith('.jpg') or file.endswith('.JPG'):
+                    zip_ref.write(os.path.join(self.tmp_folder[1], file), file)  # Adiciona a imagem ao arquivo KMZ
+
+        return kmz_path
 
 
 if __name__ == '__main__':
