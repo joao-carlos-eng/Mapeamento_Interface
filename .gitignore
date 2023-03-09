@@ -131,3 +131,5 @@ dmypy.json
 .idea/dbnavigator.xml
 arquivo.kmz
 .idea/Mapeamento_Interface.iml
+
+.kmz
