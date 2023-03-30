@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(729, 833)
+        MainWindow.resize(738, 897)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
@@ -117,7 +117,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scroll_Area = QtWidgets.QWidget()
-        self.scroll_Area.setGeometry(QtCore.QRect(0, 0, 709, 579))
+        self.scroll_Area.setGeometry(QtCore.QRect(0, 0, 718, 643))
         self.scroll_Area.setObjectName("scroll_Area")
         self.scrollArea.setWidget(self.scroll_Area)
         self.gridLayout.addWidget(self.scrollArea, 0, 0, 1, 8)
