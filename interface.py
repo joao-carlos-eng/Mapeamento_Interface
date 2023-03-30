@@ -10,6 +10,12 @@ import kmz_analiser
 analizer = kmz_analiser.Application()
 
 
+def gerar_pixmaps(path):
+    image = QPixmap(path)
+    new_image = image.scaled(688, 620)
+    return new_image
+
+
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, kmz=analizer):
         super().__init__()
@@ -132,10 +138,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Adiciona as novas imagens
         for path in list_of_images:
-            if os.path.exists(path.strip()):
-                pixmap = QPixmap(path.strip())
+            path.strip()
+            if os.path.exists(path):
+                print(self.kmz.file_images[path])
+                if self.kmz.file_images[path]:
+                    image = self.kmz.file_images[path]
+                else:
+                    image = gerar_pixmaps(path)
+                    self.kmz.file_images[path] = image
                 image_label = QLabel(self)
-                image_label.setPixmap(pixmap)
+                image_label.setPixmap(image)
                 self.image_widgets.append(image_label)
                 self.image_layout.addWidget(image_label)
 

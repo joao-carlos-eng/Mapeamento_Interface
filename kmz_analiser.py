@@ -5,6 +5,8 @@ import tempfile
 import zipfile
 from tkinter import filedialog
 from xml.etree import ElementTree as Et
+from pprint import pprint
+
 
 
 def tratar_picture_path(picture_path, tmp_folder):
@@ -46,6 +48,7 @@ class Application:
         self.current_placemark = 0
         self.filename = ''
         self.tmp_folder = []
+        self.file_images = {}
 
     def select_file(self):
         self.filename = filedialog.askopenfilename(initialdir=os.getcwd(), title="Selecione um arquivo KMZ",
@@ -59,8 +62,8 @@ class Application:
         placemarks = root.findall(
             ".//{http://www.opengis.net/kml/2.2}Placemark[{http://www.opengis.net/kml/2.2}Point]")
 
-        for placemark in placemarks:
-            self.placemarks.append(placemark)
+        for place in placemarks:
+            self.placemarks.append(place)
 
     def show_placemark(self):
         if self.current_placemark < len(self.placemarks):
@@ -88,8 +91,9 @@ class Application:
                 picture = placemark_atributos.get('pictures')
                 picture_path = tratar_picture_path(picture, self.tmp_folder[1])
                 placemark_atributos['picture_path'] = picture_path
+                self.file_images.update({path: None for path in picture_path})
 
-            print(placemark_atributos)
+            pprint(placemark_atributos)
             return placemark_atributos
 
     def move_placemark(self, category):
@@ -137,4 +141,4 @@ if __name__ == '__main__':
     app.select_file()
     app.load_placemarks()
     placemark = app.show_placemark()
-    print(placemark)
+    pprint(placemark)
