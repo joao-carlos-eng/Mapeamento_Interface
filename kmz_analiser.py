@@ -8,7 +8,6 @@ from xml.etree import ElementTree as Et
 from pprint import pprint
 
 
-
 def tratar_picture_path(picture_path, tmp_folder):
     padrao = r'<img src="([^"]+)"\/>'
     matches = re.findall(padrao, picture_path)
