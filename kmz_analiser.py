@@ -1,9 +1,9 @@
+# kmz_analiser.py
 import os
 import re
-import shutil
 import tempfile
 import zipfile
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from xml.etree import ElementTree as Et
 from pprint import pprint
 
@@ -21,7 +21,6 @@ def tratar_picture_path(picture_path, tmp_folder):
 
 
 def extract_files_from_kmz(kmz_path):
-    # extrai todos os arquivos do kmz para uma pasta temporária
     tmp_folder = tempfile.mkdtemp()
     with zipfile.ZipFile(kmz_path, 'r') as zip_ref:
         if 'doc.kml' in zip_ref.namelist():
@@ -37,7 +36,29 @@ def extract_files_from_kmz(kmz_path):
 
     kml_path = os.path.join(tmp_folder, 'doc.kml')
 
-    return kml_path, tmp_folder
+    return {'kml_path': kml_path, 'images_folder': tmp_folder}
+
+
+def auto_analisar(placemark):
+    altura = placemark.get('1.altura')
+    tracao = placemark.get('2.esforco')
+    pictures = placemark.get('picture_path')
+    codigo = placemark.get('8.codigo')
+    equipamento = placemark.get('7.equipamento')
+
+    if not any([altura, tracao, pictures]):
+        return 'reprovado'
+
+    if not altura or not tracao:
+        return 'a_refazer'
+
+    if not pictures:
+        return 'a_refazer'
+
+    if equipamento and not codigo:
+        return 'a_refazer'
+
+    return 'aprovado'
 
 
 class Application:
@@ -46,8 +67,11 @@ class Application:
         self.placemarks = []
         self.current_placemark = 0
         self.filename = ''
-        self.tmp_folder = []
+        self.tmp_folder = {}
         self.file_images = {}
+        self.aprovados = []
+        self.reprovados = []
+        self.a_refazer = []
 
     def select_file(self):
         self.filename = filedialog.askopenfilename(initialdir=os.getcwd(), title="Selecione um arquivo KMZ",
@@ -55,8 +79,7 @@ class Application:
         self.tmp_folder = extract_files_from_kmz(self.filename)
 
     def load_placemarks(self):
-        # Analisa o arquivo KML usando a biblioteca Etree e encontra todos os placemarks pontos com extensões de dados.
-        tree = Et.parse(self.tmp_folder[0])
+        tree = Et.parse(self.tmp_folder['kml_path'])
         root = tree.getroot()
         placemarks = root.findall(
             ".//{http://www.opengis.net/kml/2.2}Placemark[{http://www.opengis.net/kml/2.2}Point]")
@@ -67,36 +90,11 @@ class Application:
     def show_placemark(self):
         if self.current_placemark < len(self.placemarks):
             placemark = self.placemarks[self.current_placemark]
-            placemark_atributos = {}
-
-            name = placemark.find(".//{http://www.opengis.net/kml/2.2}name").text
-            coordinates = placemark.find(".//{http://www.opengis.net/kml/2.2}coordinates").text
-            description = placemark.find(".//{http://www.opengis.net/kml/2.2}description").text if placemark.find(
-                ".//{http://www.opengis.net/kml/2.2}description") is not None else ''
-            placemark_atributos['name'] = name
-            placemark_atributos['coordinates'] = coordinates
-            placemark_atributos['description'] = description
-
-            for data in placemark.findall(".//{http://www.opengis.net/kml/2.2}ExtendedData/{"
-                                          "http://www.opengis.net/kml/2.2}Data"):
-                name = data.attrib['name']
-                try:
-                    value = data.find("{http://www.opengis.net/kml/2.2}value").text
-                except AttributeError:
-                    continue
-                placemark_atributos[name] = value
-
-            if placemark_atributos.get('pictures') is not None:
-                picture = placemark_atributos.get('pictures')
-                picture_path = tratar_picture_path(picture, self.tmp_folder[1])
-                placemark_atributos['picture_path'] = picture_path
-                self.file_images.update({path: None for path in picture_path})
-
+            placemark_atributos = self.get_placemark_data(placemark)
             pprint(placemark_atributos)
             return placemark_atributos
 
     def move_placemark(self, category):
-        # Adicione um código para mover o placemark para a pasta aprovados ou reprovados, dependendo da categoria.
         placemark = self.placemarks[self.current_placemark]
         category_folder = os.path.join(os.path.dirname(self.filename), category)
         if not os.path.exists(category_folder):
@@ -107,37 +105,82 @@ class Application:
 
     def save_to_kmz(self):
         if not self.filename:
-            # se o arquivo não tiver sido carregado ainda, não há nada para salvar
-            return
+            # exibe uma mensagem de erro
+            messagebox.showerror("Erro", f"Nenhum arquivo selecionado: {self.filename}")
+            return None
 
-        # Cria uma pasta no arquivo kml para os arquivos aprovados e reprovados e refaz o arquivo kml
-        doc = Et.parse(self.tmp_folder[0])
+        doc = Et.parse(self.tmp_folder['kml_path'])
         root = doc.getroot()
-        root[0].append(Et.Element('Folder'))
-        root[0][1].set('id', 'Aprovados')
-        root[0].append(Et.Element('Folder'))
-        root[0][2].set('id', 'Reprovados')
-        root[0].append(Et.Element('Folder'))
-        root[0][3].set('id', 'A refazer')
-        doc.write(self.tmp_folder[0])
 
-        # Cria um arquivo KMZ com o mesmo nome do arquivo original, mas com a extensão.kmz
+        aprovados_folder = Et.Element('Folder')
+        aprovados_folder.set('id', 'Aprovados')
+        reprovados_folder = Et.Element('Folder')
+        reprovados_folder.set('id', 'Reprovados')
+        refazer_folder = Et.Element('Folder')
+        refazer_folder.set('id', 'A refazer')
+
+        for place in self.aprovados:
+            aprovados_folder.append(place)
+        for place in self.reprovados:
+            reprovados_folder.append(place)
+        for place in self.a_refazer:
+            refazer_folder.append(place)
+
+        root[0].append(aprovados_folder)
+        root[0].append(reprovados_folder)
+        root[0].append(refazer_folder)
+
+        doc.write(self.tmp_folder['kml_path'])
+
         kmz_path = self.filename.replace('.kmz', '_new.kmz')
         with zipfile.ZipFile(kmz_path, 'w') as zip_ref:
-            # Adiciona o arquivo KML modificado ao arquivo KMZ
-            zip_ref.write(self.tmp_folder[0], 'doc.kml')
+            zip_ref.write(self.tmp_folder['kml_path'], 'doc.kml')
 
-            # Adiciona todas as imagens ao arquivo KMZ
-            for file in os.listdir(self.tmp_folder[1]):
+            for file in os.listdir(self.tmp_folder['images_folder']):
                 if file.endswith('.jpg') or file.endswith('.JPG'):
-                    zip_ref.write(os.path.join(self.tmp_folder[1], file), file)  # Adiciona a imagem ao arquivo KMZ
+                    zip_ref.write(os.path.join(self.tmp_folder['images_folder'], file), file)
 
         return kmz_path
 
+    def processar_placemarks(self):
+        for placemark in self.placemarks:
+            placemark_atributos = self.get_placemark_data(placemark)
+            status = auto_analisar(placemark_atributos)
+            if status == 'aprovado':
+                self.aprovados.append(placemark)
+            elif status == 'a_refazer':
+                self.a_refazer.append(placemark)
+            elif status == 'reprovado':
+                self.reprovados.append(placemark)
 
-if __name__ == '__main__':
-    app = Application()
-    app.select_file()
-    app.load_placemarks()
-    placemark = app.show_placemark()
-    pprint(placemark)
+    def get_placemark_data(self, placemark):
+        placemark_atributos = {}
+
+        name_element = placemark.find(".//{http://www.opengis.net/kml/2.2}name")
+        coordinates_element = placemark.find(".//{http://www.opengis.net/kml/2.2}coordinates")
+        description_element = placemark.find(".//{http://www.opengis.net/kml/2.2}description")
+
+        name = name_element.text if name_element is not None else None
+        coordinates = coordinates_element.text if coordinates_element is not None else None
+        description = description_element.text if description_element is not None else ''
+
+        placemark_atributos['name'] = name
+        placemark_atributos['coordinates'] = coordinates
+        placemark_atributos['description'] = description
+
+        for data in placemark.findall(".//{http://www.opengis.net/kml/2.2}ExtendedData/{"
+                                      "http://www.opengis.net/kml/2.2}Data"):
+            name = data.attrib['name']
+            try:
+                value = data.find("{http://www.opengis.net/kml/2.2}value").text
+            except AttributeError:
+                continue
+            placemark_atributos[name] = value
+
+        if placemark_atributos.get('pictures') is not None:
+            picture = placemark_atributos.get('pictures')
+            picture_path = tratar_picture_path(picture, self.tmp_folder['images_folder'])
+            placemark_atributos['picture_path'] = picture_path
+            self.file_images.update({path: None for path in picture_path})
+
+        return placemark_atributos
