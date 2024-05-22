@@ -135,3 +135,6 @@ arquivo.kmz
 *.kmz
 /.idea
 /.idea
+.idea/misc.xml
+.idea/Mapeamento_Interface.iml
+.idea/misc.xml
