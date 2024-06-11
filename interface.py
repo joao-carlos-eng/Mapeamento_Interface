@@ -1,7 +1,7 @@
-# interface.py
 import os
 import shutil
 import sys
+
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QHBoxLayout, QLabel, QFileDialog, QMessageBox
 from PySide6.QtGui import QPixmap
@@ -37,28 +37,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.image_area = QWidget(self.scroll_Area)  # widget que contém as imagens
         self.image_layout = QHBoxLayout(self.image_area)  # layout para as imagens
 
-        self.aprovados = []
-        self.reprovados = []
-        self.a_refazer = []
-
         self.timer = QTimer()
         self.timer.timeout.connect(self.auto_analizar_step)
 
     def select_file(self):
-        self.filename = QFileDialog.getOpenFileName(self, "Selecione um arquivo KMZ", os.getcwd(), "KMZ files (*.kmz)")[
-            0]
-        if not self.filename:
-            return
+        self.kmz.select_file()
 
-        estado_salvo = self.auto_save.load_state(self.filename)
+        estado_salvo = self.auto_save.load_state(self.kmz.filename)
         if estado_salvo:
             if self.perguntar_retomar_estado():
                 self.kmz.current_placemark = estado_salvo['current_placemark']
             else:
                 self.kmz.current_placemark = 0
 
-        self.tmp_folder = kmz_analiser.extract_files_from_kmz(self.filename)
-        self.kmz.tmp_folder = self.tmp_folder
         self.kmz.load_placemarks()
         self.auto_analizar()  # Realiza a análise automática
         self.exibir_dados()
@@ -82,15 +73,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.save_state()
 
     def aprovar_place(self):
-        self.aprovados.append(self.kmz.placemarks[self.kmz.current_placemark])
+        self.kmz.aprovados.append(self.kmz.placemarks[self.kmz.current_placemark])
         self.next_placemark()
 
     def refazer_place(self):
-        self.a_refazer.append(self.kmz.placemarks[self.kmz.current_placemark])
+        self.kmz.a_refazer.append(self.kmz.placemarks[self.kmz.current_placemark])
         self.next_placemark()
 
     def reprovar_place(self):
-        self.reprovados.append(self.kmz.placemarks[self.kmz.current_placemark])
+        self.kmz.reprovados.append(self.kmz.placemarks[self.kmz.current_placemark])
         self.next_placemark()
 
     def exibir_dados(self):
@@ -148,21 +139,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         shutil.copyfile(result, os.path.join(path_to_save, os.path.basename(result)))
 
-        self.aprovados = []
-        self.reprovados = []
-        self.a_refazer = []
+        self.kmz.aprovados = []
+        self.kmz.reprovados = []
+        self.kmz.a_refazer = []
         self.kmz.current_placemark = 0
 
     def save_state(self):
         estado = {'current_placemark': self.kmz.current_placemark}
-        self.auto_save.save_state(self.filename, estado)
+        self.auto_save.save_state(self.kmz.filename, estado)
 
     def auto_analizar(self):
-        self.timer.start(100)  # Intervalo de 100ms
+        self.timer.start(300)  # Intervalo de 500ms
 
     def auto_analizar_step(self):
-        if self.kmz.current_placemark >= len(self.kmz.placemarks):
+        if self.kmz.current_placemark >= len(self.kmz.placemarks) - 1:
             self.timer.stop()
+            QMessageBox.information(self, "Análise Automática", "Análise Automática Concluída")
             return
 
         placemark = self.kmz.placemarks[self.kmz.current_placemark]
